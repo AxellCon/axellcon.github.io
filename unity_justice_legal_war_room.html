@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unity & Justice Brothers — Legal War Room</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121936;
+      --panel-2: #0f1530;
+      --text: #edf2ff;
+      --muted: #b6c2ea;
+      --accent: #d4af37;
+      --accent-2: #87a8ff;
+      --line: rgba(255,255,255,.12);
+      --ok: #7ee081;
+      --shadow: 0 16px 48px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #08101e 0%, #0b1020 100%);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero {
+      background: radial-gradient(circle at top right, rgba(212,175,55,.18), transparent 28%), linear-gradient(180deg, #121936 0%, #0d1430 100%);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 2rem;
+      letter-spacing: .4px;
+    }
+    .brand p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+    .pillbar, .tabbar, .quickbar, .actionbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .pill, .tab, button, .mini {
+      border: 1px solid var(--line);
+      background: #17204a;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: .18s ease;
+      font-size: .95rem;
+    }
+    .pill:hover, .tab:hover, button:hover, .mini:hover { transform: translateY(-1px); }
+    .active {
+      background: linear-gradient(180deg, #d4af37, #b68e16);
+      color: #161616;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.3fr .7fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card h2, .card h3 {
+      margin-top: 0;
+    }
+    label { display:block; margin-bottom: 8px; color: var(--muted); }
+    textarea, input, select {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--text);
+      outline: none;
+      font-size: 1rem;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    .muted { color: var(--muted); }
+    .small { font-size: .92rem; }
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .result-box {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .result-box h4 { margin: 0 0 10px; }
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+    .query {
+      border: 1px dashed rgba(255,255,255,.18);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.02);
+      display:flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+    .query code {
+      color: #fff6c5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: Consolas, monospace;
+      font-size: .92rem;
+    }
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      padding: 10px;
+    }
+    .hidden { display:none; }
+    @media (max-width: 920px) {
+      .grid { grid-template-columns: 1fr; }
+      .results { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="topbar">
+        <div class="brand">
+          <h1 id="title">Unity & Justice Brothers — Legal War Room</h1>
+          <p id="subtitle">Focused legal research portal for statutes, regulations, cases, HUD, civil rights, and Puerto Rico law.</p>
+        </div>
+        <div class="pillbar">
+          <button id="langEN" class="pill active">English</button>
+          <button id="langES" class="pill">Español</button>
+        </div>
+      </div>
+      <div style="height:14px"></div>
+      <div class="tabbar">
+        <button class="tab active" data-mode="search" id="tab-search">Search</button>
+        <button class="tab" data-mode="warroom" id="tab-warroom">War Room</button>
+        <button class="tab" data-mode="queries" id="tab-queries">Litigation Queries</button>
+        <button class="tab" data-mode="saved" id="tab-saved">Saved Strategies</button>
+      </div>
+    </section>
+
+    <section id="panel-search" class="grid">
+      <div class="card">
+        <h2 id="search-h">Legal Search</h2>
+        <label id="query-label" for="searchInput">Type your issue, statute, case topic, or agency problem</label>
+        <textarea id="searchInput" placeholder="Example: procedural due process housing voucher termination"></textarea>
+        <div style="height:14px"></div>
+        <div class="quickbar" id="categoryBar"></div>
+        <div style="height:14px"></div>
+        <div class="actionbar">
+          <button id="btnGoogle" class="active">Open Google Search</button>
+          <button id="btnScholar">Google Scholar</button>
+          <button id="btnSave">Save this strategy</button>
+          <button id="btnClear">Clear</button>
+        </div>
+        <div style="height:16px"></div>
+        <p class="muted small" id="engine-note">This portal uses trusted-site Google search strings so it works even if Google Programmable Search Engine fails.</p>
+      </div>
+
+      <div class="card">
+        <h3 id="presets-h">Quick Litigation Presets</h3>
+        <div class="list" id="presetList"></div>
+      </div>
+    </section>
+
+    <section id="panel-warroom" class="hidden">
+      <div class="card">
+        <h2 id="warroom-h">Court War Room</h2>
+        <p class="muted" id="warroom-p">Click a mission to launch a focused research path.</p>
+        <div class="results" id="warroomGrid"></div>
+      </div>
+    </section>
+
+    <section id="panel-queries" class="hidden">
+      <div class="card">
+        <h2 id="queries-h">Litigation Query Builder</h2>
+        <p class="muted" id="queries-p">Copy these proven search strings or open them directly.</p>
+        <div class="list" id="queryBuilder"></div>
+      </div>
+    </section>
+
+    <section id="panel-saved" class="hidden">
+      <div class="card">
+        <h2 id="saved-h">Saved Strategies</h2>
+        <p class="muted" id="saved-p">Your saved search strategies stay on this device using local storage.</p>
+        <div class="list" id="savedList"></div>
+      </div>
+    </section>
+
+    <p class="footer-note" id="footer">Knowledge is Light. Brotherhood is Strength. Justice is Eternal.</p>
+  </div>
+
+  <script>
+    const texts = {
+      en: {
+        title: 'Unity & Justice Brothers — Legal War Room',
+        subtitle: 'Focused legal research portal for statutes, regulations, cases, HUD, civil rights, and Puerto Rico law.',
+        tabs: ['Search', 'War Room', 'Litigation Queries', 'Saved Strategies'],
+        searchH: 'Legal Search',
+        queryLabel: 'Type your issue, statute, case topic, or agency problem',
+        placeholder: 'Example: procedural due process housing voucher termination',
+        engineNote: 'This portal uses trusted-site Google search strings so it works even if Google Programmable Search Engine fails.',
+        presetsH: 'Quick Litigation Presets',
+        warroomH: 'Court War Room',
+        warroomP: 'Click a mission to launch a focused research path.',
+        queriesH: 'Litigation Query Builder',
+        queriesP: 'Copy these proven search strings or open them directly.',
+        savedH: 'Saved Strategies',
+        savedP: 'Your saved search strategies stay on this device using local storage.',
+        footer: 'Knowledge is Light. Brotherhood is Strength. Justice is Eternal.',
+        saveEmpty: 'Write a search strategy first.',
+        savedOk: 'Strategy saved.',
+        noSaved: 'No saved strategies yet.',
+        open: 'Open',
+        copy: 'Copy',
+        remove: 'Remove'
+      },
+      es: {
+        title: 'Unity & Justice Brothers — Sala Legal de Guerra',
+        subtitle: 'Portal de investigación jurídica enfocado en estatutos, reglamentos, casos, HUD, derechos civiles y derecho de Puerto Rico.',
+        tabs: ['Buscar', 'Sala de Guerra', 'Consultas de Litigio', 'Estrategias Guardadas'],
+        searchH: 'Búsqueda Jurídica',
+        queryLabel: 'Escriba su problema, estatuto, tema de caso o controversia con agencia',
+        placeholder: 'Ejemplo: debido proceso procesal terminación de vale de vivienda',
+        engineNote: 'Este portal usa búsquedas de Google con sitios confiables, por eso funciona aunque falle Google Programmable Search Engine.',
+        presetsH: 'Atajos de Litigio',
+        warroomH: 'Sala de Guerra Judicial',
+        warroomP: 'Oprima una misión para abrir una ruta de investigación enfocada.',
+        queriesH: 'Constructor de Consultas de Litigio',
+        queriesP: 'Copie estas búsquedas probadas o ábralas directamente.',
+        savedH: 'Estrategias Guardadas',
+        savedP: 'Sus estrategias guardadas permanecen en este dispositivo usando almacenamiento local.',
+        footer: 'El conocimiento es luz. La hermandad es fuerza. La justicia es eterna.',
+        saveEmpty: 'Primero escriba una estrategia de búsqueda.',
+        savedOk: 'Estrategia guardada.',
+        noSaved: 'Todavía no hay estrategias guardadas.',
+        open: 'Abrir',
+        copy: 'Copiar',
+        remove: 'Eliminar'
+      }
+    };
+
+    const categories = [
+      { key:'federal', en:'Federal Law', es:'Ley Federal', filter:'(site:law.cornell.edu OR site:govinfo.gov OR site:ecfr.gov)' },
+      { key:'courts', en:'Courts', es:'Tribunales', filter:'(site:uscourts.gov OR site:ca1.uscourts.gov OR site:supremecourt.gov OR site:supreme.justia.com)' },
+      { key:'hud', en:'HUD / Section 8', es:'HUD / Sección 8', filter:'(site:hud.gov OR site:ecfr.gov OR site:govinfo.gov)' },
+      { key:'civil', en:'Civil Rights §1983', es:'Derechos Civiles §1983', filter:'(site:law.cornell.edu OR site:govinfo.gov OR site:justice.gov OR site:supreme.justia.com)' },
+      { key:'pr', en:'Puerto Rico Law', es:'Derecho de Puerto Rico', filter:'(site:lexjuris.com OR site:ramajudicial.pr OR site:oslpr.org)' },
+      { key:'admin', en:'APA / Agency Action', es:'APA / Acción de Agencia', filter:'(site:justice.gov OR site:law.cornell.edu OR site:govinfo.gov OR site:ecfr.gov)' }
+    ];
+
+    const presets = [
+      { en:'Procedural due process', es:'Debido proceso procesal', q:'procedural due process hearing notice opportunity to be heard' },
+      { en:'HUD voucher termination', es:'Terminación de vale HUD', q:'housing choice voucher termination informal hearing notice due process' },
+      { en:'Agency failure to act', es:'Agencia que no actúa', q:'agency failure to act APA unreasonable delay duty to act' },
+      { en:'42 USC 1983', es:'42 USC 1983', q:'42 USC 1983 due process property interest municipal liability' },
+      { en:'First Circuit search', es:'Búsqueda Primer Circuito', q:'First Circuit due process administrative law housing' },
+      { en:'Puerto Rico due process', es:'Debido proceso Puerto Rico', q:'Puerto Rico due process administrative law notice hearing' }
+    ];
+
+    const warroom = [
+      { titleEn:'Build Complaint Research', titleEs:'Construir investigación para demanda', descEn:'Cases, statutes, regulations, and constitutional angles.', descEs:'Casos, estatutos, reglamentos y ángulos constitucionales.', q:'complaint pleading elements due process civil rights APA' },
+      { titleEn:'HUD / Section 8 Mission', titleEs:'Misión HUD / Sección 8', descEn:'Voucher rights, notices, hearings, and PHA obligations.', descEs:'Derechos del vale, avisos, vistas y obligaciones de la PHA.', q:'housing choice voucher due process notice hearing PHA obligations' },
+      { titleEn:'Civil Rights Mission', titleEs:'Misión de derechos civiles', descEn:'§1983, municipal liability, color of law, constitutional claims.', descEs:'§1983, responsabilidad municipal, color de ley y reclamaciones constitucionales.', q:'42 USC 1983 municipal liability color of law constitutional violation' },
+      { titleEn:'Administrative Law Mission', titleEs:'Misión de derecho administrativo', descEn:'APA claims, unreasonable delay, arbitrary action, exhaustion.', descEs:'Reclamaciones APA, demora irrazonable, acción arbitraria, agotamiento.', q:'APA arbitrary capricious unreasonable delay exhaustion administrative record' }
+    ];
+
+    const queryTemplates = [
+      '"due process" housing voucher termination notice hearing',
+      '"agency failure to act" APA unreasonable delay duty to act',
+      '"42 U.S.C. 1983" procedural due process property interest',
+      '"First Circuit" due process administrative law housing',
+      '"24 CFR" housing choice voucher informal hearing',
+      'Puerto Rico due process administrative notice hearing housing'
+    ];
+
+    let currentLang = 'en';
+    let currentCategory = categories[0];
+
+    const $ = id => document.getElementById(id);
+
+    function buildGoogleQuery(base) {
+      const q = (base || '').trim();
+      const merged = `${q} ${currentCategory.filter}`.trim();
+      return merged;
+    }
+
+    function openGoogle(query) {
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+    }
+
+    function openScholar(query) {
+      window.open(`https://scholar.google.com/scholar?q=${encodeURIComponent(query)}`, '_blank');
+    }
+
+    function renderLanguage() {
+      const t = texts[currentLang];
+      $('title').textContent = t.title;
+      $('subtitle').textContent = t.subtitle;
+      $('tab-search').textContent = t.tabs[0];
+      $('tab-warroom').textContent = t.tabs[1];
+      $('tab-queries').textContent = t.tabs[2];
+      $('tab-saved').textContent = t.tabs[3];
+      $('search-h').textContent = t.searchH;
+      $('query-label').textContent = t.queryLabel;
+      $('searchInput').placeholder = t.placeholder;
+      $('engine-note').textContent = t.engineNote;
+      $('presets-h').textContent = t.presetsH;
+      $('warroom-h').textContent = t.warroomH;
+      $('warroom-p').textContent = t.warroomP;
+      $('queries-h').textContent = t.queriesH;
+      $('queries-p').textContent = t.queriesP;
+      $('saved-h').textContent = t.savedH;
+      $('saved-p').textContent = t.savedP;
+      $('footer').textContent = t.footer;
+      $('btnGoogle').textContent = currentLang === 'en' ? 'Open Google Search' : 'Abrir búsqueda en Google';
+      $('btnScholar').textContent = 'Google Scholar';
+      $('btnSave').textContent = currentLang === 'en' ? 'Save this strategy' : 'Guardar esta estrategia';
+      $('btnClear').textContent = currentLang === 'en' ? 'Clear' : 'Limpiar';
+      renderCategories();
+      renderPresets();
+      renderWarroom();
+      renderQueryBuilder();
+      renderSaved();
+    }
+
+    function renderCategories() {
+      const bar = $('categoryBar');
+      bar.innerHTML = '';
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'pill' + (cat.key === currentCategory.key ? ' active' : '');
+        btn.textContent = currentLang === 'en' ? cat.en : cat.es;
+        btn.onclick = () => { currentCategory = cat; renderCategories(); };
+        bar.appendChild(btn);
+      });
+    }
+
+    function renderPresets() {
+      const t = texts[currentLang];
+      const list = $('presetList');
+      list.innerHTML = '';
+      presets.forEach(item => {
+        const box = document.createElement('div');
+        box.className = 'query';
+        box.innerHTML = `<div><strong>${currentLang === 'en' ? item.en : item.es}</strong><br><code>${item.q}</code></div>`;
+        const btn = document.createElement('button');
+        btn.textContent = t.open;
+        btn.onclick = () => { $('searchInput').value = item.q; openGoogle(buildGoogleQuery(item.q)); };
+        box.appendChild(btn);
+        list.appendChild(box);
+      });
+    }
+
+    function renderWarroom() {
+      const grid = $('warroomGrid');
+      grid.innerHTML = '';
+      warroom.forEach(item => {
+        const box = document.createElement('div');
+        box.className = 'result-box';
+        box.innerHTML = `<h4>${currentLang === 'en' ? item.titleEn : item.titleEs}</h4><p class="muted">${currentLang === 'en' ? item.descEn : item.descEs}</p>`;
+        const row = document.createElement('div');
+        row.className = 'actionbar';
+        const g = document.createElement('button');
+        g.textContent = texts[currentLang].open;
+        g.className = 'active';
+        g.onclick = () => openGoogle(buildGoogleQuery(item.q));
+        const s = document.createElement('button');
+        s.textContent = 'Scholar';
+        s.onclick = () => openScholar(buildGoogleQuery(item.q));
+        row.appendChild(g); row.appendChild(s);
+        box.appendChild(row);
+        grid.appendChild(box);
+      });
+    }
+
+    function renderQueryBuilder() {
+      const list = $('queryBuilder');
+      list.innerHTML = '';
+      queryTemplates.forEach(q => {
+        const box = document.createElement('div');
+        box.className = 'query';
+        const left = document.createElement('div');
+        left.innerHTML = `<code>${q}</code>`;
+        const right = document.createElement('div');
+        right.className = 'actionbar';
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = texts[currentLang].copy;
+        copyBtn.onclick = async () => { await navigator.clipboard.writeText(q); };
+        const openBtn = document.createElement('button');
+        openBtn.className = 'active';
+        openBtn.textContent = texts[currentLang].open;
+        openBtn.onclick = () => openGoogle(buildGoogleQuery(q));
+        right.appendChild(copyBtn); right.appendChild(openBtn);
+        box.appendChild(left); box.appendChild(right);
+        list.appendChild(box);
+      });
+    }
+
+    function getSaved() {
+      try { return JSON.parse(localStorage.getItem('ujb_legal_saved') || '[]'); }
+      catch { return []; }
+    }
+
+    function setSaved(items) {
+      localStorage.setItem('ujb_legal_saved', JSON.stringify(items));
+    }
+
+    function renderSaved() {
+      const items = getSaved();
+      const list = $('savedList');
+      list.innerHTML = '';
+      if (!items.length) {
+        const p = document.createElement('p');
+        p.className = 'muted';
+        p.textContent = texts[currentLang].noSaved;
+        list.appendChild(p);
+        return;
+      }
+      items.forEach((item, idx) => {
+        const box = document.createElement('div');
+        box.className = 'query';
+        box.innerHTML = `<div><strong>${item.category}</strong><br><code>${item.query}</code></div>`;
+        const bar = document.createElement('div');
+        bar.className = 'actionbar';
+        const openBtn = document.createElement('button');
+        openBtn.className = 'active';
+        openBtn.textContent = texts[currentLang].open;
+        openBtn.onclick = () => openGoogle(item.query);
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = texts[currentLang].remove;
+        removeBtn.onclick = () => {
+          const next = getSaved().filter((_, i) => i !== idx);
+          setSaved(next);
+          renderSaved();
+        };
+        bar.appendChild(openBtn); bar.appendChild(removeBtn);
+        box.appendChild(bar);
+        list.appendChild(box);
+      });
+    }
+
+    function switchPanel(mode) {
+      ['search','warroom','queries','saved'].forEach(m => {
+        $('panel-' + m).classList.toggle('hidden', m !== mode);
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.mode === mode);
+      });
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = () => switchPanel(tab.dataset.mode);
+    });
+
+    $('langEN').onclick = () => {
+      currentLang = 'en';
+      $('langEN').classList.add('active');
+      $('langES').classList.remove('active');
+      renderLanguage();
+    };
+    $('langES').onclick = () => {
+      currentLang = 'es';
+      $('langES').classList.add('active');
+      $('langEN').classList.remove('active');
+      renderLanguage();
+    };
+
+    $('btnGoogle').onclick = () => openGoogle(buildGoogleQuery($('searchInput').value));
+    $('btnScholar').onclick = () => openScholar(buildGoogleQuery($('searchInput').value));
+    $('btnClear').onclick = () => $('searchInput').value = '';
+    $('btnSave').onclick = () => {
+      const raw = $('searchInput').value.trim();
+      if (!raw) return alert(texts[currentLang].saveEmpty);
+      const items = getSaved();
+      items.unshift({ category: currentLang === 'en' ? currentCategory.en : currentCategory.es, query: buildGoogleQuery(raw) });
+      setSaved(items.slice(0, 30));
+      renderSaved();
+      alert(texts[currentLang].savedOk);
+    };
+
+    renderLanguage();
+  </script>
+</body>
+</html>
